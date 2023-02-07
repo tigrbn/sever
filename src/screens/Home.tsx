@@ -1,14 +1,45 @@
-import React , { useEffect, useState } from 'react';
+import React , { useEffect, useState, useRef } from 'react';
 import { ImageBackground, Text, View} from 'react-native';
 import { useAuth } from '../hooks/useAuth';
-import { Image, FlatList, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
+import { Animated, Image, FlatList, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
 import {LinearGradient} from 'expo-linear-gradient';
 import ToursScreen from './TourScreen';
-
-  const HomeScreen  = ({ navigation}) =>  {    
+import Pagination from './pagination';
+import { ScrollView } from 'react-native-gesture-handler';
+  const HomeScreen  = ({ navigation}) =>  {  
+  const [index, setIndex] = useState(0);
+  const scrollX = useRef(new Animated.Value(0)).current;  
   const [isLoading, setLoading] = useState(false);
   const [categories, setCategories] = useState([]);    
-  const [banners, setBann] = useState([]);    
+  const [banners, setBann] = useState([]);   
+  const DEVICE_WIDTH = Dimensions.get('window').width;
+  const DEVICE_HEIGHT = Dimensions.get('window').height;
+  const handleOnScroll = event => {
+    Animated.event(
+      [
+        {
+          nativeEvent: {
+            contentOffset: {
+              x: scrollX,
+            },
+          },
+        },
+      ],
+      {
+        useNativeDriver: false,
+      },
+    )(event);
+  };
+
+  const handleOnViewableItemsChanged = useRef(({viewableItems}) => {
+    // console.log('viewableItems', viewableItems);
+    setIndex(viewableItems[0].index);
+  }).current;
+
+  const viewabilityConfig = useRef({
+    itemVisiblePercentThreshold: 50,
+  }).current;
+
   getCategories = () => {
       fetch('http://194.36.191.166/api/v1/tours/')
         .then((response) => response.json())
@@ -30,7 +61,7 @@ import ToursScreen from './TourScreen';
       getBanners();
   }, []);  
   return (
-    <View className="w-full h-full">
+    <ScrollView className="w-full h-full">
       <View>
           {isLoading ? 
           <Text>Загрузка...</Text> :
@@ -38,50 +69,55 @@ import ToursScreen from './TourScreen';
         <View> 
           <FlatList 
             data={banners}
-            showsHorizontalScrollIndicator={true}
-            pagingEnabled
             horizontal
+            pagingEnabled
+            snapToAlignment="center"
+            showsHorizontalScrollIndicator={false}
+            onScroll={handleOnScroll}
+            onViewableItemsChanged={handleOnViewableItemsChanged}
+            viewabilityConfig={viewabilityConfig}
             className="rounded-3xl py-2 px-2 m-2"
-            keyExtractor={({ id }) => id.toString()}
             renderItem={({ item }) => (
               <TouchableOpacity 
               onPress={() => navigation.navigate('ToursScreen' , {paramKey: item.id} )}>
-                <View style={styles.gallery}>
-                <Image style={styles.img} resizeMode='cover' source={{uri: 'http://194.36.191.166/storage/'+ item.image.image_name}}/>
+                <View>
+                <Image  
+                  style={{
+                  width: DEVICE_WIDTH/1.2,
+                  marginRight: 20,
+                  position: 'relative',
+                  borderRadius: 19,
+                  resizeMode: 'cover',
+                  height: DEVICE_HEIGHT/2.6,
+              }}  source={{uri: 'http://194.36.191.166/storage/'+ item.image.image_name}}/>
                 </View>
                 <View style={styles.Panelslider}>
-                <Text style={styles.textPanelslider}>{`${item.title}`}</Text>
-                <Text style={styles.pricePanelText}>{`${item.schedules[0].price/1}`} ₽</Text>
+                    <Text style={styles.textPanelslider}>{`${item.title}`}</Text>
+                    <Text style={styles.pricePanelText}>{`${item.schedules[0].price/1}`} ₽</Text>
                 </View>
               </TouchableOpacity>
             )}
-          />
-        <View>
-        <Text style={styles.zagText}>Рекомендации</Text>
-        </View>      
-          <FlatList 
-                className="rounded-3xl py-2 px-2 m-2"
-                data={categories}
-                numColumns={2}
-                key={2}
-                keyExtractor={({ id }) => id.toString()}
-                renderItem={({ item }) => (
+            />
+                <Pagination data={banners} scrollX={scrollX} index={index} />
                 <View>
-                    <View>
-                        <TouchableOpacity  
-                           style={styles.container}
-                            onPress={() => navigation.navigate('ToursScreen' , {paramKey: item.id} )}>
-                            <View  style={styles.box}>
-                            <Image  style={styles.inner} source={{uri: 'http://194.36.191.166/storage/'+ item.image.image_name}}/>
-                              <View style={styles.textPanel}>
-                                  <Text style={styles.colText}>{`${item.title}`}</Text>
-                                  <Text style={styles.priceText}>{`${item.schedules[0].price/1}`} ₽</Text>
-                              </View>
-                              </View>
-                        </TouchableOpacity>
-                      </View>
-                  </View>
-                )}
+                    <Text style={styles.zagText}>Рекомендации</Text>
+                </View>      
+                <FlatList 
+                    className="rounded-3xl py-2 px-2 m-2"
+                    data={categories}
+                    numColumns={2}
+                    key={2}
+                    renderItem={({ item }) => (
+                      <TouchableOpacity  
+                      style={{width: DEVICE_WIDTH/2.15, padding: 5}}
+                      onPress={() => navigation.navigate('ToursScreen' , {paramKey: item.id} )}>
+                          <Image  style={{width: '100%', flex: 1, height: 180,  borderRadius: 19, resizeMode: 'cover'}}  source={{uri: 'http://194.36.191.166/storage/'+ item.image.image_name}}/>
+                          <View style={styles.textPanel}>
+                          <Text style={styles.colText}>{`${item.title}`}</Text>
+                          <Text style={styles.priceText}>{`${item.schedules[0].price/1}`} ₽</Text>
+                          </View>
+                      </TouchableOpacity>
+                    )}
               />
   </View>
           )}
@@ -89,7 +125,7 @@ import ToursScreen from './TourScreen';
       {/* <View className="mx-4 h-5/6 flex justify-center align-center space-y-6">
       <Text className="text-white text-center text-2xl">Welcome {user?.email}!</Text>
     </View> */}
-    </View>
+    </ScrollView>
     
   );
 }
@@ -101,10 +137,8 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 17, 35, 0.75)',
     borderRadius: 19,
     height: 100,
-    paddingLeft: 0,
-    marginRight: 20,
     position:'absolute',
-    right: 0,
+    right: 20,
     left: 0,
     bottom: 0
   },
@@ -135,7 +169,7 @@ const styles = StyleSheet.create({
     top: 30,
   },
   gallery: {
-    width: 330,
+   
     position: 'relative',
     paddingRight: 20,
     borderRadius: 10,
@@ -154,7 +188,7 @@ const styles = StyleSheet.create({
     width: '100%',
     borderRadius: 10,
     padding: 10,
-    margin: 10,
+    margin: 5,
     backgroundColor: 'rgba(0, 17, 35, 0.75)'
   },
   container: {

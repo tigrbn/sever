@@ -16,14 +16,31 @@ const HomeStack = createStackNavigator();
 function HomeStackScreen() {
   return (
     <HomeStack.Navigator   
-        // screenOptions={{
-        //   headerShown: false
-        // }}
+        screenOptions={{
+          headerShown: true
+        }}
         >
-        <HomeStack.Screen name="HomeScreen" component={HomeScreen}/>
+        <HomeStack.Screen name="HomeScreen" 
+        options={{
+          title: 'Главная',
+          headerTintColor: '#fff',
+          headerTitleStyle: {
+            fontWeight: 'bold',
+            color: '#001B36'
+          },
+        }}
+        component={HomeScreen}/>
         <HomeStack.Screen name="CategoryList" component={CategoryList}/>
         <HomeStack.Screen name="CategoryScreen" component={CategoryScreen} options={({ route }) => ({ title: route.params.name })}/>
-        <HomeStack.Screen name="ToursScreen" component={ToursScreen} options={({ route }) => ({ title: route.params.name })}/>
+        <HomeStack.Screen name="ToursScreen"  component={ToursScreen}
+         options={{
+          title: 'О туре',
+          headerTitleStyle: {
+            fontWeight: 'bold',
+            color: '#001B36'
+          },
+        }}
+        />
     </HomeStack.Navigator>
   );
 }
@@ -36,7 +53,16 @@ function TourStackScreen() {
         screenOptions={{
           headerShown: true
         }}>
-        <TourStack.Screen name="CategoryList" component={CategoryList}/>
+        <TourStack.Screen 
+         options={{
+          title: 'Виды туров',
+          headerTintColor: '#fff',
+          headerTitleStyle: {
+            fontWeight: 'bold',
+            color: '#001B36'
+          },
+        }}
+        name="CategoryList" component={CategoryList}/>
         <TourStack.Screen name="CategoryScreen" component={CategoryScreen} options={({ route }) => ({ title: route.params.name })}/>
         <TourStack.Screen name="ToursScreen" component={ToursScreen} options={({ route }) => ({ title: route.params.name })}/>
     </TourStack.Navigator>
@@ -67,8 +93,8 @@ export default function UserStack() {
                     source={require("./assets/category.png")}
                     resizeMode="contain"
                     style={{
-                      width: 35,
-                      height: 35,
+                      width: 25,
+                      height: 25,
                       tintColor: focused ? "#0053A9" : "rgba(0, 83, 169, 0.5)",
                     }}
                   />
@@ -87,8 +113,8 @@ export default function UserStack() {
                     source={require("./assets/home.png")}
                     resizeMode="contain"
                     style={{
-                      width: 35,
-                      height: 35,
+                      width: 25,
+                      height: 25,
                       tintColor: focused ? "#0053A9" : "rgba(0, 83, 169, 0.5)",
                     }}
                   />

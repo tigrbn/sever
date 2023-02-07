@@ -16,8 +16,8 @@ function Settings() {
                     source={require("../navigation/assets/personal.png")}
                     resizeMode="contain"
                     style={{
-                      width: 35,
-                      height: 35,
+                      width: 25,
+                      height: 25,
                       tintColor:  "rgba(0, 83, 169, 0.5)",
                     }}
                   />
@@ -37,7 +37,7 @@ function Settings() {
                   <Feather
                     name="log-out"
                     color="#001B36"
-                    size={"30"}
+                    size={"35"}
                   />
                   <Text style={{color: "#001B36"}} className="flex-1 font-title text-2xl font-bold text-left text-white"> Выйти</Text>
                 </View>
